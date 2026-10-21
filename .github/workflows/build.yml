@@ -1,0 +1,30 @@
+# Run on every push and every pull request
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest   # the project uses Windows APIs, so build on Windows
+
+    steps:
+      # 1. Download your repo's code onto GitHub's build machine
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      # 2. Make Visual Studio's build tool (MSBuild) available
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # 3. Compile the solution (.sln) in Release mode for 64-bit
+      #    If your .sln isn't in the repo's top folder, put its path after "msbuild",
+      #    e.g.  msbuild src/DllIntegrityMonitor.sln /p:Configuration=Release /p:Platform=x64
+      - name: Build
+        run: msbuild /p:Configuration=Release /p:Platform=x64
+
+      # 4. Save the compiled .exe so it can be downloaded from the run's page
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: DllIntegrityMonitor
+          path: "**/x64/Release/*.exe"
